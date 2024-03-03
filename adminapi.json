@@ -1,0 +1,1380 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "DeWaveAdmin",
+        "version": "1.1.0",
+        "description": "DeWave Admin API"
+    },
+    "servers": [
+        {
+            "url": "//admin.devel.yarvolna.net/v1",
+            "description": "Stage"
+        }
+    ],
+    "paths": {
+        "/v1/admin/signin": {
+            "post": {
+                "requestBody": {
+                    "description": "Экземпляр авторизационных данных",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/signinRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "tags": [
+                    "API административных действий"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/signinResponse"
+                                }
+                            }
+                        },
+                        "description": "Успешная авторизация"
+                    }
+                },
+                "operationId": "adminSignIn",
+                "summary": "Авторизация админа",
+                "x-codegen-request-body-name": "body"
+            }
+        },
+        "/v1/admin/servers": {
+            "post": {
+                "requestBody": {
+                    "description": "Запрос на листинг или на поиск серверов",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ListDto"
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "API административных действий"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/chipset"
+                                }
+                            }
+                        },
+                        "description": "Листинг"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "listServers",
+                "summary": "Листинг серверов"
+            }
+        },
+        "/v1/admin/server": {
+            "patch": {
+                "requestBody": {
+                    "description": "Запрос на создание или редактирование сервера",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/chipsetData"
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Сервер успешно сохранён"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "editChipset",
+                "summary": "Редактирование/создание сервера"
+            }
+        },
+        "/v1/admin/server/{id}": {
+            "delete": {
+                "tags": [
+                    "API административных действий"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "description": "ID сервера",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Сервер удалён"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "dropChipset",
+                "summary": "Удаление сервера"
+            }
+        },
+        "/v1/admin/server/{uid}/history": {
+            "get": {
+                "tags": [
+                ],
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "description": "Макс. кол-во записей на страницу выдачи.",
+                        "schema": {
+                            "default": 25,
+                            "maximum": 500,
+                            "minimum": 25,
+                            "type": "integer"
+                        },
+                        "in": "query",
+                        "required": false,
+                        "allowEmptyValue": true
+                    },
+                    {
+                        "name": "offset",
+                        "description": "Отступ в шт. записей.",
+                        "schema": {
+                            "default": 0,
+                            "minimum": 0,
+                            "type": "integer"
+                        },
+                        "in": "query",
+                        "required": false,
+                        "allowEmptyValue": true
+                    },
+                    {
+                        "name": "uid",
+                        "description": "Уникальный идентификатор сервера",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "События",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/history"
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Листинг"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "listServerHistory",
+                "summary": "Листинг истории по одному серверу"
+            }
+        },
+        "/v1/admin/servers/bulk/publish": {
+            "post": {
+                "requestBody": {
+                    "description": "Список уникальных идентификаторов серверов",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/uidsDto"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "tags": [
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Запрос успешно исполнен"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "bulkPublishServers",
+                "summary": "Массовая публикация серверов",
+                "x-codegen-request-body-name": "body"
+            }
+        },
+        "/v1/admin/servers/bulk/unpublish": {
+            "post": {
+                "requestBody": {
+                    "description": "Список уникальных идентификаторов серверов",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/uidsDto"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "tags": [
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Запрос успешно исполнен"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "bulkUnpublishServers",
+                "summary": "Массовая отмена публикации серверов",
+                "x-codegen-request-body-name": "body"
+            }
+        },
+        "/v1/admin/servers/bulk/delete": {
+            "post": {
+                "requestBody": {
+                    "description": "Список уникальных идентификаторов серверов",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/uidsDto"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "tags": [
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Запрос успешно исполнен"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "bulkDropServers",
+                "summary": "Массовое удаление серверов",
+                "x-codegen-request-body-name": "body"
+            }
+        },
+        "/v1/admin/users": {
+            "post": {
+                "requestBody": {
+                    "description": "Запрос на листинг или на поиск пользователей",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ListDto"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "tags": [
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Результат",
+                                    "type": "object",
+                                    "properties": {
+                                        "offset": {
+                                            "description": "отступ",
+                                            "type": "integer"
+                                        },
+                                        "count": {
+                                            "description": "кол-во элементов",
+                                            "type": "integer"
+                                        },
+                                        "orderDesc": {
+                                            "description": "признак обратной сортировки",
+                                            "type": "boolean"
+                                        },
+                                        "query": {
+                                            "description": "поисковый запрос",
+                                            "type": "string"
+                                        },
+                                        "items": {
+                                            "description": "результаты",
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/userDto"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Результаты листинга или поиска"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "listUsers",
+                "summary": "Листинг пользователей",
+                "x-codegen-request-body-name": "body"
+            }
+        },
+        "/v1/admin/cfgs": {
+            "summary": "Конфигурации",
+            "description": "",
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ConfigListItem"
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Список конфигураций"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "summary": "Список конфигураций",
+                "description": "Отдаёт список конфигураций, без разбиения на страницы"
+            }
+        },
+        "/v1/admin/cfg/{id}": {
+            "summary": "Управление конфигом",
+            "description": "Управление конфигом",
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConfigEditItem"
+                                }
+                            }
+                        },
+                        "description": "Полностью заполненный всеми зависимостями объект конфигурации для редактирования"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "viewConfig",
+                "summary": "Загрузка конфига",
+                "description": "Загружается полный объект конфигурации, со всеми зависимостями и опциями для редактирования"
+            },
+            "delete": {
+                "responses": {
+                    "204": {
+                        "description": "Конфиг успешно удалён"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "configDelete",
+                "summary": "Удаление конфига",
+                "description": "Удаление конфигурации. Удаление пройдёт успешно только если нет рабочих станций, использующих данный конфиг."
+            },
+            "parameters": [
+                {
+                    "examples": {
+                        "Просто ID": {
+                            "value": "74"
+                        }
+                    },
+                    "name": "id",
+                    "description": "ID конфига",
+                    "schema": {
+                        "type": "integer"
+                    },
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/v1/admin/cfg": {
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConfigCommitItem"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Конфиг успешно сохранён"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "editConfig",
+                "summary": "Создание или сохранение конфига"
+            }
+        },
+        "/v1/admin/cfg/categories": {
+            "summary": "Листинг категорий характеристик",
+            "get": {
+                "responses": {
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    },
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/IdTitleItem"
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Список категорий"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "listCats",
+                "summary": "Листинг категорий"
+            }
+        },
+        "/v1/admin/cfg/category": {
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IdTitleItem"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Категория успешно сохранена"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "editCat",
+                "summary": "Создание или редактирование категории"
+            }
+        },
+        "/v1/admin/cfg/category/{id}": {
+            "delete": {
+                "responses": {
+                    "204": {
+                        "description": "Категория успешно удалена"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "dropCat",
+                "summary": "Удаление категории"
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "description": "ID категории",
+                    "schema": {
+                        "type": "integer"
+                    },
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/v1/admin/cfg/oses": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/OsItem"
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Листинг операционных систем"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "operationId": "listOses",
+                "summary": "Листинг операционных систем"
+            }
+        },
+        "/v1/admin/cfg/os": {
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OsItem"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Операционная система успешно сохранена"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "security": [
+                    {
+                        "CasualJwt": [
+                        ]
+                    }
+                ],
+                "operationId": "editOs",
+                "summary": "Создание или редактирование операционной системы"
+            }
+        },
+        "/v1/admin/cfg/os/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "description": "ID операционной системы",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Операционная система успешно удалена"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "operationId": "dropOs",
+                "summary": "Удаление операционной системы"
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "description": "ID операционной системы",
+                    "schema": {
+                        "type": "integer"
+                    },
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        }
+    },
+    "components": {
+        "schemas": {
+            "signupResponse": {
+                "title": "Факт успешной регистрации пользователя",
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "description": "JWT токен для дальнейшего обращения к API",
+                        "type": "string"
+                    },
+                    "id": {
+                        "format": "int32",
+                        "description": "Идентификатор пользователя",
+                        "type": "integer"
+                    },
+                    "name": {
+                        "description": "Имя пользователя",
+                        "type": "string"
+                    },
+                    "login": {
+                        "description": "Логин пользователя",
+                        "type": "string"
+                    },
+                    "phone": {
+                        "description": "Номер телефона",
+                        "type": "string"
+                    }
+                }
+            },
+            "adminSigninResponse": {
+                "title": "Факт успешной авторизации администратора",
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "description": "JWT токен для дальнейшего обращения к API",
+                        "type": "string"
+                    },
+                    "id": {
+                        "format": "int32",
+                        "description": "Идентификатор пользователя",
+                        "type": "integer"
+                    }
+                }
+            },
+            "signinResponse": {
+                "title": "Факт успешной авторизации пользователя",
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "description": "JWT токен для дальнейшего обращения к API",
+                        "type": "string"
+                    }
+                }
+            },
+            "ListDto": {
+                "title": "Запрос на листинг или поиск",
+                "type": "object",
+                "properties": {
+                    "offset": {
+                        "description": "Отступ в штуках",
+                        "type": "integer"
+                    },
+                    "limit": {
+                        "description": "Макс.колво в ответе",
+                        "type": "integer"
+                    },
+                    "query": {
+                        "description": "Подстрока для поиска",
+                        "type": "string"
+                    }
+                }
+            },
+            "signinRequest": {
+                "title": "Экземпляр авторизационных данных",
+                "type": "object",
+                "properties": {
+                    "login": {
+                        "description": "Логин",
+                        "type": "string"
+                    },
+                    "password": {
+                        "description": "Пароль",
+                        "type": "string"
+                    }
+                }
+            },
+            "profile": {
+                "title": "Профиль пользователя",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "format": "int32",
+                        "description": "Уникальный идентификатор",
+                        "type": "integer"
+                    },
+                    "login": {
+                        "description": "Логин (почта)",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Имя пользователя",
+                        "type": "string"
+                    },
+                    "phone": {
+                        "description": "Номер телефона",
+                        "type": "string"
+                    }
+                }
+            },
+            "profileDto": {
+                "title": "Экземпляр пользовательских данных",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Имя пользователя",
+                        "type": "string"
+                    },
+                    "phone": {
+                        "description": "Номер телефона",
+                        "type": "string"
+                    }
+                }
+            },
+            "userDto": {
+                "title": "Экземпляр пользовательских данных",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "ID пользователя",
+                        "type": "integer"
+                    },
+                    "login": {
+                        "description": "Логин пользователя",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Имя пользователя",
+                        "type": "string"
+                    },
+                    "phone": {
+                        "description": "Номер телефона",
+                        "type": "string"
+                    }
+                }
+            },
+            "history": {
+                "title": "Историческое событие",
+                "type": "object",
+                "properties": {
+                    "indate": {
+                        "description": "Дата события",
+                        "type": "string"
+                    },
+                    "shortDesc": {
+                        "description": "Короткая версия события",
+                        "type": "string"
+                    },
+                    "event": {
+                        "description": "Полное событие",
+                        "type": "string"
+                    }
+                }
+            },
+            "chipset": {
+                "title": "Экземпляр сервера",
+                "type": "object",
+                "properties": {
+                    "uid": {
+                        "description": "Уникальный ID",
+                        "type": "string"
+                    },
+                    "ip": {
+                        "description": "IP адрес",
+                        "type": "string"
+                    },
+                    "status": {
+                        "description": "Строка состояния",
+                        "type": "string"
+                    },
+                    "published": {
+                        "description": "Флаг публикации. true - если сервер публикуется на витрине, false - если нет.",
+                        "type": "boolean"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/userDto"
+                    },
+                    "template": {
+                        "$ref": "#/components/schemas/ConfigEditItem"
+                    }
+                }
+            },
+            "chipsetData": {
+                "title": "Данные сервера",
+                "type": "object",
+                "properties": {
+                    "uid": {
+                        "description": "Уникальный ID",
+                        "type": "string"
+                    },
+                    "ip": {
+                        "description": "IP адрес",
+                        "type": "string"
+                    },
+                    "status": {
+                        "description": "Строка состояния",
+                        "type": "string"
+                    },
+                    "published": {
+                        "description": "Флаг публикации. true - если сервер публикуется на витрине, false - если нет.",
+                        "type": "boolean"
+                    },
+                    "templateId": {
+                        "description": "ID шаблона конфигурации",
+                        "type": "integer"
+                    }
+                }
+            },
+            "uidsDto": {
+                "title": "Список уникальных идентификаторов серверов",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "ConfigListItem": {
+                "title": "Root Type for ConfigListItem",
+                "description": "Списочный объект конфигурации",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "format": "int32",
+                        "description": "ID конфигурации.",
+                        "type": "integer",
+                        "example": "1"
+                    },
+                    "title": {
+                        "description": "Название конфигурации",
+                        "type": "string",
+                        "example": "Просто конфиг"
+                    }
+                },
+                "example": {
+                    "id": 0,
+                    "title": ""
+                }
+            },
+            "ConfigEditItem": {
+                "title": "Root Type for ConfigEditItem",
+                "description": "Полный объект конфига со всеми зависимостями",
+                "required": [
+                    "supportedOses"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "format": "int32",
+                        "description": "ID конфигурации",
+                        "type": "integer",
+                        "example": "42"
+                    },
+                    "oses": {
+                        "description": "Список всех доступных OS для выбора",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "format": "int32",
+                                    "type": "integer"
+                                },
+                                "title": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "example": "[ {\n    \"id\" : 3,\n    \"title\" : \"ОС Виндоуз\"\n  },{\n    \"id\" : 4,\n    \"title\" : \"Linux Debian\"\n  } ]"
+                    },
+                    "title": {
+                        "description": "Название конфигурации",
+                        "type": "string",
+                        "example": "Простой конфиг"
+                    },
+                    "categories": {
+                        "description": "Список всех характеристик, сгруппированным по категориям",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CategoryViewItem"
+                        }
+                    },
+                    "supportedOses": {
+                        "description": "Список выбранных ID операционных систем, которые поддерживает данный конфиг",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "example": {
+                    "id": 55,
+                    "supportedOses": [
+                        3
+                    ],
+                    "oses": [
+                        {
+                            "id": 3,
+                            "title": "ОС Виндоуз"
+                        }
+                    ],
+                    "title": "КОнфиг",
+                    "categories": [
+                        {
+                            "title": "Категория #1",
+                            "props": [
+                                {
+                                    "id": 23,
+                                    "title": "CPU",
+                                    "selectedValue": "3",
+                                    "used": true,
+                                    "variants": [
+                                        "1",
+                                        "2",
+                                        "4",
+                                        "16"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "CategoryViewItem": {
+                "title": "Root Type for CategoryViewItem",
+                "description": "Объект категории, загруженный со всеми зависимостями для редактирования",
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "description": "Название категории (группы) характеристик",
+                        "type": "string",
+                        "example": "Оперативная память"
+                    },
+                    "props": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PropertyViewItem"
+                        }
+                    }
+                },
+                "example": {
+                    "title": "Категория #1",
+                    "props": [
+                        {
+                            "id": 23,
+                            "title": "CPU",
+                            "selectedValue": "3",
+                            "used": true,
+                            "variants": [
+                                "1",
+                                "2",
+                                "4",
+                                "16"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "PropertyViewItem": {
+                "title": "Root Type for PropertyViewItem",
+                "description": "Объект одной характеристики, загруженный со всеми вариантами для редактирования",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "format": "int32",
+                        "description": "ID характеристики",
+                        "type": "integer",
+                        "example": "234"
+                    },
+                    "title": {
+                        "description": "Название характеристики",
+                        "type": "string",
+                        "example": "Частота"
+                    },
+                    "selectedValue": {
+                        "description": "Значение, указанное ранее. Может не совпадать с вариантами, это означает, что оно было введено вручную.",
+                        "type": "string",
+                        "example": "любая строка"
+                    },
+                    "used": {
+                        "description": "Признак того, что данная характеристика используется в загруженной конфигурации.",
+                        "type": "boolean"
+                    },
+                    "variants": {
+                        "description": "Список предопределённых вариантов значения характеристики",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "example": {
+                    "id": 23,
+                    "title": "CPU",
+                    "selectedValue": "3",
+                    "used": true,
+                    "variants": [
+                        "1",
+                        "2",
+                        "4",
+                        "16"
+                    ]
+                }
+            },
+            "ServerError": {
+                "title": "Root Type for ServerError",
+                "description": "Ошибка бизнес-логики",
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "description": "Описание ошибки",
+                        "type": "string"
+                    },
+                    "reason": {
+                        "description": "Ошибка на целевом элементе вызова",
+                        "type": "string"
+                    },
+                    "causes": {
+                        "description": "Цепочка вызова",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ServerErrorCause"
+                        }
+                    }
+                },
+                "example": {
+                    "error": "",
+                    "reason": "",
+                    "causes": [
+                        {
+                            "reason": "",
+                            "error": "",
+                            "stack": [
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            },
+            "ServerErrorCause": {
+                "title": "Root Type for ServerErrorCause",
+                "description": "Адресация причины ошибки",
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "description": "Причина целевого элемента",
+                        "type": "string"
+                    },
+                    "error": {
+                        "description": "Причина источника",
+                        "type": "string"
+                    },
+                    "stack": {
+                        "description": "Стек элементов цепочки вызова",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "example": {
+                    "reason": "",
+                    "error": "",
+                    "stack": [
+                        "",
+                        "",
+                        ""
+                    ]
+                }
+            },
+            "ConfigCommitItem": {
+                "title": "Root Type for ConfigCommitItem",
+                "description": "Объект конфига для сохранения",
+                "required": [
+                    "props",
+                    "title",
+                    "supportedOses"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "format": "int32",
+                        "description": "ID конфига (если редактируется существующий)",
+                        "type": "integer"
+                    },
+                    "title": {
+                        "description": "Название конфига",
+                        "type": "string"
+                    },
+                    "props": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PropertyCommitItem"
+                        }
+                    },
+                    "supportedOses": {
+                        "description": "Список ID операционных систем, которые поддерживает данный конфиг",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "example": {
+                    "id": 55,
+                    "supportedOses": [
+                        1
+                    ],
+                    "title": "КОнфиг",
+                    "props": [
+                        {
+                            "propId": 23,
+                            "value": "3"
+                        }
+                    ]
+                }
+            },
+            "PropertyCommitItem": {
+                "title": "Root Type for PropertyCommitItem",
+                "description": "Объект характеристики с выбранным значением, для сохранения",
+                "type": "object",
+                "properties": {
+                    "propId": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                },
+                "example": {
+                    "propId": 23,
+                    "value": "3"
+                }
+            },
+            "IdTitleItem": {
+                "title": "Root Type for IdTitleItem",
+                "description": "Объект содержащий только ID и название.",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "format": "int32",
+                        "description": "ID объекта",
+                        "type": "integer"
+                    },
+                    "title": {
+                        "description": "Название объекта",
+                        "type": "string"
+                    }
+                },
+                "example": {
+                    "id": 0,
+                    "title": ""
+                }
+            },
+            "OsItem": {
+                "title": "Root Type for OsItem",
+                "description": "Объект операционной системы",
+                "required": [
+                    "uid"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "format": "int32",
+                        "description": "ID операционной системы",
+                        "type": "integer"
+                    },
+                    "title": {
+                        "description": "Название операционной системы",
+                        "type": "string"
+                    },
+                    "uid": {
+                        "description": "Уникальный межсистемный идентификатор операционной системы",
+                        "type": "string"
+                    }
+                },
+                "example": {
+                    "id": 0,
+                    "title": "",
+                    "uid": ""
+                }
+            }
+        },
+        "responses": {
+            "Forbidden": {
+                "description": "Токен авторизации истёк или отсутствует или не содержит необходимого признака (например, sudo)"
+            },
+            "InternalError": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ServerError"
+                        }
+                    }
+                },
+                "description": "Внутренняя ошибка бизнес-логики."
+            }
+        },
+        "securitySchemes": {
+            "CasualJwt": {
+                "scheme": "bearer",
+                "type": "http",
+                "description": "Self-signed jwt"
+            }
+        }
+    },
+    "security": [
+        {
+            "CasualJwt": [
+            ]
+        }
+    ],
+    "tags": [
+        {
+            "name": "API административных действий"
+        }
+    ]
+}
