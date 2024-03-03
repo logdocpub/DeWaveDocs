@@ -1,0 +1,591 @@
+---
+openapi: 3.0.1
+info:
+  title: DeWave Admin base
+  version: 1.0.1
+servers:
+- url: //admin.devel.yarvolna.net/
+  description: Stage
+- url: http://localhost:9010/
+  description: Dev
+paths:
+  /v1/admin/signin:
+    post:
+      requestBody:
+        description: Экземпляр авторизационных данных
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/signinRequest'
+        required: true
+      tags:
+      - API административных действий
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/signinResponse'
+          description: Успешная авторизация
+      operationId: adminSignIn
+      summary: Авторизация админа
+      x-codegen-request-body-name: body
+  /v1/admin/template/{id}:
+    delete:
+      tags:
+      - API административных действий
+      parameters:
+      - name: id
+        description: ID шаблона конфигурации
+        schema:
+          type: integer
+        in: path
+        required: true
+      - name: Authorization
+        description: Токен авторизации
+        schema:
+          type: string
+        in: header
+        required: true
+      responses:
+        "204":
+          description: Конфигурация удалена
+        "555":
+          description: Ошибка исполнения
+      operationId: dropTemplate
+      summary: Удаление конфигурации
+  /v1/admin/template:
+    patch:
+      requestBody:
+        description: Запрос на создание или редактирование шаблона конфигурации
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChipSetTemplate'
+      tags:
+      - API административных действий
+      parameters:
+      - name: Authorization
+        description: Токен авторизации
+        schema: {}
+        in: header
+        required: true
+      responses:
+        "201":
+          description: Конфигурация сохранена
+        "555":
+          description: Ошибка исполнения
+      operationId: editTemplate
+      summary: Редактирование/создание конфигурации
+  /v1/admin/templates:
+    post:
+      requestBody:
+        description: Запрос на листинг или на поиск шаблонов
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListDto'
+      tags:
+      - API административных действий
+      parameters:
+      - name: Authorization
+        description: Токен авторизации
+        in: header
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                title: Результат
+                type: object
+                properties:
+                  offset:
+                    description: отступ
+                    type: integer
+                  count:
+                    description: кол-во элементов
+                    type: integer
+                  orderDesc:
+                    description: признак обратной сортировки
+                    type: boolean
+                  query:
+                    description: поисковый запрос
+                    type: string
+                  items:
+                    description: результаты
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChipSetTemplate'
+          description: Результаты листинга или поиска
+        "555":
+          description: Ошибка исполнения
+      operationId: listTemplates
+      summary: Листинг конфигураций
+  /v1/admin/templates/bulk/delete:
+    post:
+      requestBody:
+        description: Список уникальных идентификаторов конфигураций
+        content:
+          application/json:
+            schema:
+              description: Список идентификаторов
+              type: array
+              items:
+                type: integer
+        required: true
+      tags:
+      - API административных действий
+      parameters:
+      - name: Authorization
+        description: Токен авторизации
+        in: header
+        required: true
+      responses:
+        "204":
+          description: Запрос успешно исполнен
+        "555":
+          description: Ошибка исполнения
+      operationId: bulkDropTemplates
+      summary: Массовое удаление конфигураций
+      x-codegen-request-body-name: body
+  /v1/admin/servers:
+    post:
+      requestBody:
+        description: Запрос на листинг или на поиск серверов
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListDto'
+      tags:
+      - API административных действий
+      parameters:
+      - style: simple
+        name: Authorization
+        description: Токен авторизации
+        in: header
+        required: true
+        allowEmptyValue: false
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/chipset'
+          description: Листинг
+        "555":
+          description: Ошибка исполнения
+        "403":
+          description: Юзер не админ
+      operationId: listServers
+      summary: Листинг серверов
+  /v1/admin/server:
+    patch:
+      requestBody:
+        description: Запрос на создание или редактирование сервера
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/chipsetData'
+      tags:
+      - API административных действий
+      parameters:
+      - name: Authorization
+        description: Токен авторизации
+        in: header
+        required: true
+      responses:
+        "201":
+          description: Сервер сохранен
+        "555":
+          description: Ошибка исполнения
+      operationId: editChipset
+      summary: Редактирование/создание сервера
+  /v1/admin/server/{id}:
+    delete:
+      tags:
+      - API административных действий
+      parameters:
+      - name: id
+        description: ID сервера
+        schema:
+          type: integer
+        in: path
+        required: true
+      - name: Authorization
+        description: Токен авторизации
+        schema: {}
+        in: header
+        required: true
+      responses:
+        "204":
+          description: Сервер удалён
+        "403": {}
+      operationId: dropChipset
+      summary: Удаление сервера
+  /v1/admin/server/{uid}/history:
+    get:
+      tags:
+      - API административных действий
+      parameters:
+      - style: simple
+        name: Authorization
+        description: Токен авторизации
+        in: header
+        required: true
+        allowEmptyValue: false
+      - name: limit
+        description: Макс. кол-во записей на страницу выдачи.
+        schema:
+          default: 25
+          maximum: 500
+          minimum: 25
+          type: integer
+        in: query
+        required: false
+        allowEmptyValue: true
+      - name: offset
+        description: Отступ в шт. записей.
+        schema:
+          default: 0
+          minimum: 0
+          type: integer
+        in: query
+        required: false
+        allowEmptyValue: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                title: События
+                type: array
+                items:
+                  $ref: '#/components/schemas/history'
+          description: Листинг
+        "555":
+          description: Ошибка исполнения
+        "403":
+          description: Юзер не админ
+      operationId: listServerHistory
+      summary: Листинг истории по одному серверу
+  /v1/admin/servers/bulk/publish:
+    post:
+      requestBody:
+        description: Список уникальных идентификаторов серверов
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/uidsDto'
+        required: true
+      tags:
+      - API административных действий
+      parameters:
+      - name: Authorization
+        description: Токен авторизации
+        in: header
+        required: true
+      responses:
+        "204":
+          description: Запрос успешно исполнен
+        "555":
+          description: Ошибка исполнения
+      operationId: bulkPublishServers
+      summary: Массовая публикация серверов
+      x-codegen-request-body-name: body
+  /v1/admin/servers/bulk/unpublish:
+    post:
+      requestBody:
+        description: Список уникальных идентификаторов серверов
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/uidsDto'
+        required: true
+      tags:
+      - API административных действий
+      parameters:
+      - name: Authorization
+        description: Токен авторизации
+        in: header
+        required: true
+      responses:
+        "204":
+          description: Запрос успешно исполнен
+        "555":
+          description: Ошибка исполнения
+      operationId: bulkUnpublishServers
+      summary: Массовая отмена публикации серверов
+      x-codegen-request-body-name: body
+  /v1/admin/servers/bulk/delete:
+    post:
+      requestBody:
+        description: Список уникальных идентификаторов серверов
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/uidsDto'
+        required: true
+      tags:
+      - API административных действий
+      parameters:
+      - name: Authorization
+        description: Токен авторизации
+        in: header
+        required: true
+      responses:
+        "204":
+          description: Запрос успешно исполнен
+        "555":
+          description: Ошибка исполнения
+      operationId: bulkDropServers
+      summary: Массовое удаление серверов
+      x-codegen-request-body-name: body
+  /v1/admin/users:
+    post:
+      requestBody:
+        description: Запрос на листинг или на поиск пользователей
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListDto'
+        required: true
+      tags:
+      - API административных действий
+      parameters:
+      - name: Authorization
+        description: Токен авторизации
+        in: header
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                title: Результат
+                type: object
+                properties:
+                  offset:
+                    description: отступ
+                    type: integer
+                  count:
+                    description: кол-во элементов
+                    type: integer
+                  orderDesc:
+                    description: признак обратной сортировки
+                    type: boolean
+                  query:
+                    description: поисковый запрос
+                    type: string
+                  items:
+                    description: результаты
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/userDto'
+          description: Результаты листинга или поиска
+        "555":
+          description: Ошибка исполнения
+      operationId: listUsers
+      summary: Листинг пользователей
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    signupResponse:
+      title: Факт успешной регистрации пользователя
+      type: object
+      properties:
+        token:
+          description: JWT токен для дальнейшего обращения к API
+          type: string
+        id:
+          format: int32
+          description: Идентификатор пользователя
+          type: integer
+        name:
+          description: Имя пользователя
+          type: string
+        login:
+          description: Логин пользователя
+          type: string
+        phone:
+          description: Номер телефона
+          type: string
+    adminSigninResponse:
+      title: Факт успешной авторизации администратора
+      type: object
+      properties:
+        token:
+          description: JWT токен для дальнейшего обращения к API
+          type: string
+        id:
+          format: int32
+          description: Идентификатор пользователя
+          type: integer
+    signinResponse:
+      title: Факт успешной авторизации пользователя
+      type: object
+      properties:
+        token:
+          description: JWT токен для дальнейшего обращения к API
+          type: string
+    ChipSetTemplate:
+      title: Экземпляр конфигурации
+      type: object
+      properties:
+        id:
+          title: ID экземпляра
+          type: integer
+        name:
+          title: Название конфигурации
+          type: string
+        props:
+          title: Список свойств конфигурации
+          type: array
+          items:
+            $ref: '#/components/schemas/CSTProperty'
+    CSTProperty:
+      title: Экземпляр свойства конфигурации
+      type: object
+      properties:
+        name:
+          title: Название свойства
+          type: string
+        values:
+          title: Список значений свойства
+          type: array
+          items:
+            $ref: '#/components/schemas/CSTPValue'
+    CSTPValue:
+      title: Экземпляр значения свойства конфигурации
+      type: object
+      properties:
+        value:
+          title: Значение свойства
+          type: string
+    ListDto:
+      title: Запрос на листинг или поиск
+      type: object
+      properties:
+        offset:
+          description: Отступ в штуках
+          type: integer
+        limit:
+          description: Макс.колво в ответе
+          type: integer
+        query:
+          description: Подстрока для поиска
+          type: string
+    signinRequest:
+      title: Экземпляр авторизационных данных
+      type: object
+      properties:
+        login:
+          description: Логин
+          type: string
+        password:
+          description: Пароль
+          type: string
+    profile:
+      title: Профиль пользователя
+      type: object
+      properties:
+        id:
+          format: int32
+          description: Уникальный идентификатор
+          type: integer
+        login:
+          description: Логин (почта)
+          type: string
+        name:
+          description: Имя пользователя
+          type: string
+        phone:
+          description: Номер телефона
+          type: string
+    profileDto:
+      title: Экземпляр пользовательских данных
+      type: object
+      properties:
+        name:
+          description: Имя пользователя
+          type: string
+        phone:
+          description: Номер телефона
+          type: string
+    userDto:
+      title: Экземпляр пользовательских данных
+      type: object
+      properties:
+        id:
+          description: ID пользователя
+          type: integer
+        login:
+          description: Логин пользователя
+          type: string
+        name:
+          description: Имя пользователя
+          type: string
+        phone:
+          description: Номер телефона
+          type: string
+    history:
+      title: Историческое событие
+      type: object
+      properties:
+        indate:
+          description: Дата события
+          type: string
+        shortDesc:
+          description: Короткая версия события
+          type: string
+        event:
+          description: Полное событие
+          type: string
+    chipset:
+      title: Экземпляр сервера
+      type: object
+      properties:
+        uid:
+          description: Уникальный ID
+          type: string
+        ip:
+          description: IP адрес
+          type: string
+        status:
+          description: Строка состояния
+          type: string
+        published:
+          description: "Флаг публикации. true - если сервер публикуется на витрине\
+            , false - если нет."
+          type: boolean
+        user:
+          $ref: '#/components/schemas/userDto'
+        template:
+          $ref: '#/components/schemas/ChipSetTemplate'
+    chipsetData:
+      title: Данные сервера
+      type: object
+      properties:
+        uid:
+          description: Уникальный ID
+          type: string
+        ip:
+          description: IP адрес
+          type: string
+        status:
+          description: Строка состояния
+          type: string
+        published:
+          description: "Флаг публикации. true - если сервер публикуется на витрине\
+            , false - если нет."
+          type: boolean
+        templateId:
+          description: ID шаблона конфигурации
+          type: integer
+    uidsDto:
+      title: Список уникальных идентификаторов серверов
+      type: array
+      items:
+        type: string
+tags:
+- name: API административных действий
